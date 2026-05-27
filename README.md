@@ -1,42 +1,95 @@
-# CICD-Pipeline-Github-Actions
-Firstly i create repo and clone it.
-i add some file  are app.py requiremets.txt, setup.py, under the test folder test_app.py and .gitignore/workflow/ci.yml files are added.
+CI/CD Pipeline using GitHub Actions
+Task Overview
 
-The workflow is configured to run automatically on the following events:
+This task demonstrates the implementation of a Continuous Integration and Continuous Deployment (CI/CD) pipeline using GitHub Actions.
+The pipeline automates the process of testing, building, deploying, and verifying the application whenever changes are pushed to the repository or a pull request is created.
 
-push → Executes the workflow whenever code is pushed to the repository.
-pull_request → Executes the workflow whenever a pull request is opened or updated.
+Repository Setup
 
-The workflow uses GitHub-hosted Ubuntu runner environment.
+The repository was created and cloned locally using Git.
+
+The following task files and folders were added:
+
+.github/workflows/ci.yml
+app.py
+requirements.txt
+setup.py
+tests/test_app.py
+README.md
+
+Workflow Configuration
+
+The workflow configuration file was created inside:
+
+.github/workflows/ci.yml
+
+The pipeline is automatically triggered on the following GitHub events:
+
+push → Runs whenever code is pushed to the repository
+pull_request → Runs whenever a pull request is opened or updated
+
+
+Runner Environment
+
+The workflow uses a GitHub-hosted Ubuntu virtual machine environment.
 
 runs-on: ubuntu-latest
 
-This provides a Linux-based virtual machine for executing workflow jobs.
+This provides a Linux-based environment for executing all CI/CD pipeline stages.
 
-The workflow was updated to install Python and the required project dependencies automatically during the CI process.
-A Python environment is configured using the `actions/setup-python` action.
-Project dependencies are installed.
-This command reads all required packages from the requirements.txt file and installs them in the workflow environment.
+Python Environment Setup
 
-A testing step was added to the CI workflow to automatically execute unit tests during the pipeline execution.
-The workflow uses `pytest` to run all test cases inside the `tests/` directory.
+The workflow configures Python automatically using GitHub Actions.
 
-- name: Run tests
+- name: Setup Python
+  uses: actions/setup-python@v5
+  with:
+    python-version: '3.11'
+Install Project Dependencies
+
+The pipeline installs all required project dependencies from the requirements.txt file.
+
+- name: Install Dependencies
+  run: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+
+This step ensures all required packages are available before testing and deployment.
+
+Run Unit Tests
+
+A testing stage was added using pytest.
+
+- name: Run Tests
   run: pytest tests/
 
-  A build step was added to package the Python application during the CI workflow execution.
+Purpose of this step:
 
-### Build Package
-The workflow uses the following command to create a source distribution package.
-This command generates a distributable source package for the application.
+Executes unit tests automatically
+Validates application functionality
+Prevents deployment if tests fail
+Build Application
 
-A simulated deployment step was added to represent the deployment stage in the CI/CD pipeline.
+The workflow packages the Python application using the following command:
 
-Deploy to Staging Using SSH into EC2
+- name: Build Application
+  run: python setup.py sdist
 
-The deployment stage was configured to connect to an EC2 instance using SSH and deploy the latest application code.
+Purpose of this step:
 
-Deployment Step
+Creates a distributable source package
+Simulates the application build process
+Verifies packaging functionality
+Deploy to Staging Environment
+
+The deployment stage was configured using SSH into an AWS EC2 instance.
+
+The workflow uses the GitHub Action:
+
+uses: appleboy/ssh-action@v1.0.3
+
+Deployment configuration:
+
 - name: Deploy to EC2
   uses: appleboy/ssh-action@v1.0.3
   with:
@@ -49,60 +102,92 @@ Deployment Step
       pip install -r requirements.txt
       sudo systemctl restart application
 EC2 Deployment Requirements
-
-The following components are required for deployment:
-
 AWS EC2 Instance
 
-A running Linux EC2 instance in Amazon Web Services using Amazon EC2.
+A running Linux EC2 instance was used as the staging server.
 
 SSH Key Pair
 
-A .pem private key file generated while creating the EC2 instance.
+A .pem private key file was generated while creating the EC2 instance.
 
-GitHub Secrets
+GitHub Repository Secrets
 
-The following repository secrets were configured:
+The following GitHub repository secrets were configured:
 
 Secret Name	Purpose
 EC2_HOST	EC2 public IP address
-EC2_USER	EC2 username
+EC2_USER	EC2 instance username
 EC2_SSH_KEY	SSH private key content
+EMAIL_USERNAME	Sender email username
+EMAIL_PASSWORD	Sender email password or app password
+
+Secrets were added in:
+
+GitHub Repository → Settings → Secrets and Variables → Actions
 Security Group Configuration
 
-Port 22 (SSH) was enabled in the EC2 Security Group to allow secure remote connections.
+The EC2 Security Group was configured to allow SSH access.
 
-Deployment Process Explanation
+Port	Purpose
+22	SSH Access
 
-The deployment step performs the following actions:
+This enables secure remote deployment from GitHub Actions.
+
+Deployment Process
+
+The deployment step performs the following actions automatically:
 
 Connects securely to the EC2 instance using SSH
 Navigates to the project directory
-Pulls the latest code from the GitHub repository
+Pulls the latest code from GitHub
 Installs updated dependencies
 Restarts the application service
 
-This automates the application deployment process after successful build and testing.
+This automates the deployment process after successful testing and build stages.
 
-The smoke test performs a basic validation of the deployed application by sending an HTTP request to the staging server.
+Smoke Testing
 
-Workflow Actions
+A smoke test stage was added to verify deployment success.
+
+Purpose of smoke testing:
+
 Sends a request to the deployed application
-Verifies that the server responds successfully
+Verifies that the application is responding correctly
 Stops the workflow automatically if the application is unavailable
 
-Purpose of Email Notifications
+Example smoke test step:
 
-The email notification step helps:
+- name: Smoke Test
+  run: |
+    echo "Running smoke tests..."
+Email Notifications
 
-Monitor CI/CD pipeline execution
-Receive workflow success or failure updates
-Quickly identify deployment or testing issues
-Improve deployment visibility and tracking
-GitHub Secrets Configuration
+Email notifications were configured to monitor pipeline execution status.
 
-The following secrets were added in GitHub repository settings:
+Purpose of notifications:
 
-Secret Name	Purpose
-EMAIL_USERNAME	Sender email username
-EMAIL_PASSWORD	Sender email password or app password
+Monitor workflow execution
+Receive deployment success/failure updates
+Identify testing or deployment issues quickly
+Improve deployment tracking and visibility
+
+Example notification step:
+
+- name: Send Email Notification
+  if: always()
+  uses: dawidd6/action-send-mail@v3
+
+
+Code Push / Pull Request
+            ↓
+Install Dependencies
+            ↓
+Run Unit Tests
+            ↓
+Build Application
+            ↓
+Deploy to EC2 Staging Server
+            ↓
+Run Smoke Tests
+            ↓
+Send Email Notifications
