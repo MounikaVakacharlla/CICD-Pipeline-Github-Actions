@@ -17,17 +17,17 @@ jobs:
 
     steps:
 
-      # Step 1 - Checkout Repository
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Step 2 - Setup Python
+      
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # Step 3 - Install Dependencies
+   
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -38,7 +38,7 @@ jobs:
 
           pip install pytest
 
-      # Step 4 - Run Unit Tests
+     
       - name: Run Tests
         run: |
           if [ -d tests ]; then
@@ -47,7 +47,7 @@ jobs:
             echo "No tests folder found. Skipping tests."
           fi
 
-      # Step 5 - Build Application
+      
       - name: Build Application
         run: |
           if [ -f setup.py ]; then
@@ -56,13 +56,13 @@ jobs:
             echo "setup.py not found. Skipping build step."
           fi
 
-      # Step 6 - Deploy to Staging
+      
       - name: Deploy to Staging
         run: |
           echo "Starting deployment to staging environment..."
           echo "Deployment completed successfully."
 
-      # Step 7 - Verify Deployment
+      
       - name: Smoke Test
         run: |
           echo "Running smoke tests..."
@@ -73,7 +73,7 @@ jobs:
             echo "app.py not found. Smoke test skipped."
           fi
 
-      # Step 8 - Email Notification
+     
       - name: Send Email Notification
         if: always()
         uses: dawidd6/action-send-mail@v3
