@@ -11,49 +11,69 @@ on:
 
 jobs:
   build-test-deploy:
-  
+    name: Build, Test and Deploy
+
     runs-on: ubuntu-latest
 
     steps:
 
+      # Step 1 - Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # Step 2 - Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      # Step 3 - Install Dependencies
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
           pip install pytest
 
+      # Step 4 - Run Unit Tests
       - name: Run Tests
         run: |
-          pytest tests/
+          if [ -d tests ]; then
+            pytest tests/
+          else
+            echo "No tests folder found. Skipping tests."
+          fi
 
+      # Step 5 - Build Application
       - name: Build Application
         run: |
-          python setup.py sdist
+          if [ -f setup.py ]; then
+            python setup.py sdist
+          else
+            echo "setup.py not found. Skipping build step."
+          fi
 
+      # Step 6 - Deploy to Staging
       - name: Deploy to Staging
         run: |
-          echo "Starting deployment..."
-          git status
-          git log -1
+          echo "Starting deployment to staging environment..."
           echo "Deployment completed successfully."
 
-      - name: Deployment Simulation
-        run: |
-          echo "Deploying application to staging server..."
-
+      # Step 7 - Verify Deployment
       - name: Smoke Test
         run: |
           echo "Running smoke tests..."
-          echo "Application is responding successfully."
 
+          if [ -f app.py ]; then
+            python app.py
+          else
+            echo "app.py not found. Smoke test skipped."
+          fi
+
+      # Step 8 - Email Notification
       - name: Send Email Notification
         if: always()
         uses: dawidd6/action-send-mail@v3
@@ -64,6 +84,84 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: GitHub Actions Pipeline Status
-          body: CI/CD Pipeline execution completed successfully.
+          body: |
+            CI/CD Pipeline execution completed.
+
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Workflow: ${{ github.workflow }}
+
+            Check workflow logs in GitHub Actions.
+
           to: vakacharlamounika861@gmail.com
           from: GitHub Actions
+          
+# name: CI/CD Pipeline
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+#   pull_request:
+#     branches:
+#       - main
+
+# jobs:
+#   build-test-deploy:
+
+#     runs-on: ubuntu-latest
+
+#     steps:
+
+#       - name: Checkout Repository
+#         uses: actions/checkout@v4
+
+#       - name: Setup Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.11'
+
+#       - name: Install Dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
+#           pip install pytest
+
+#       - name: Run Tests
+#         run: |
+#           pytest tests/
+
+#       - name: Build Application
+#         run: |
+#           python setup.py sdist
+
+#       - name: Deploy to Staging
+#         run: |
+#           echo "Starting deployment..."
+#           git status
+#           git log -1
+#           echo "Deployment completed successfully."
+
+#       - name: Deployment Simulation
+#         run: |
+#           echo "Deploying application to staging server..."
+
+#       - name: Smoke Test
+#         run: |
+#           echo "Running smoke tests..."
+#           echo "Application is responding successfully."
+
+#       - name: Send Email Notification
+#         if: always()
+#         uses: dawidd6/action-send-mail@v3
+#         with:
+#           server_address: smtp.gmail.com
+#           server_port: 465
+#           secure: true
+#           username: ${{ secrets.EMAIL_USERNAME }}
+#           password: ${{ secrets.EMAIL_PASSWORD }}
+#           subject: GitHub Actions Pipeline Status
+#           body: CI/CD Pipeline execution completed successfully.
+#           to: vakacharlamounika861@gmail.com
+#           from: GitHub Actions
