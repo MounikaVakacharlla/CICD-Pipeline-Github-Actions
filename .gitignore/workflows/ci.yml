@@ -39,10 +39,10 @@ jobs:
 
     - name: Deploy to Staging
       run: |
-       echo "Starting deployment..."
-       git status
-       git log -1
-       echo "Deployment completed successfully."
+        echo "Starting deployment..."
+        git status
+        git log -1
+        echo "Deployment completed successfully."
 
     - name: Deployment Simulation
       run: |
