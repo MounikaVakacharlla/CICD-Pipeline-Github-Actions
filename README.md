@@ -3,7 +3,7 @@ Task Overview
 
 This task demonstrates the implementation of a Continuous Integration and Continuous Deployment (CI/CD) pipeline using GitHub Actions.
 The pipeline automates the process of testing, building, deploying, and verifying the application whenever changes are pushed to the repository or a pull request is created.
-
+step1:
 Repository Setup
 
 The repository was created and cloned locally using Git.
@@ -23,11 +23,14 @@ The workflow configuration file was created inside:
 
 .github/workflows/ci.yml
 
+Step2:
+
 The pipeline is automatically triggered on the following GitHub events:
 
 push → Runs whenever code is pushed to the repository
 pull_request → Runs whenever a pull request is opened or updated
 
+step3:
 
 Runner Environment
 
@@ -36,6 +39,8 @@ The workflow uses a GitHub-hosted Ubuntu virtual machine environment.
 runs-on: ubuntu-latest
 
 This provides a Linux-based environment for executing all CI/CD pipeline stages.
+
+step4:
 
 Python Environment Setup
 
@@ -56,6 +61,8 @@ The pipeline installs all required project dependencies from the requirements.tx
 
 This step ensures all required packages are available before testing and deployment.
 
+step5:
+
 Run Unit Tests
 
 A testing stage was added using pytest.
@@ -68,6 +75,9 @@ Purpose of this step:
 Executes unit tests automatically
 Validates application functionality
 Prevents deployment if tests fail
+
+step6:
+
 Build Application
 
 The workflow packages the Python application using the following command:
@@ -80,6 +90,9 @@ Purpose of this step:
 Creates a distributable source package
 Simulates the application build process
 Verifies packaging functionality
+
+Step7:
+
 Deploy to Staging Environment
 
 The deployment stage was configured using SSH into an AWS EC2 instance.
@@ -145,6 +158,8 @@ Restarts the application service
 
 This automates the deployment process after successful testing and build stages.
 
+step8:
+
 Smoke Testing
 
 A smoke test stage was added to verify deployment success.
@@ -160,6 +175,9 @@ Example smoke test step:
 - name: Smoke Test
   run: |
     echo "Running smoke tests..."
+
+step9:
+
 Email Notifications
 
 Email notifications were configured to monitor pipeline execution status.
@@ -177,6 +195,7 @@ Example notification step:
   if: always()
   uses: dawidd6/action-send-mail@v3
 
+///overall workflow
 
 Code Push / Pull Request
             ↓
